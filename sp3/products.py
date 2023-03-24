@@ -11,7 +11,7 @@ def product_ids():
 
 def product_recommendations(product= None):
     if not product:
-        random.choice(list)
+        random.choice(ids)
     preference_id = """SELECT preference.id FROM preference, product_preference, product WHERE preference.id =
     product_preference.preference_id and product_preference.product_id = product.id
     and product.id = (%)"""
@@ -23,3 +23,7 @@ def product_recommendations(product= None):
     products = qr.run_query(get_products, get_preference_id, True)
     print(f"Products retrieved\n {products}")
     return
+
+if __name__ == "__main__":
+    ids = product_ids()
+    product_recommendations()

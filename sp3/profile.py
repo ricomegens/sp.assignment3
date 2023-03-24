@@ -6,11 +6,11 @@ def profiles():
     profiles = """SELECT profile.id FROM profile"""
     get_profiles = qr.run_query(profiles, fetch=True)
     all_profiles = {profile for profile in get_profiles}
-    return
+    return all_profiles
 
 def similar_products(profile= None):
-    if profile == None:
-        random.choice(profile)
+    if not profile:
+        profile = random.choice(ids)
     similar = """SELECT product_id FROM similars, profile, product WHERE profile.id = (%) AND similars.profileid
         = profile.id AND similars.productid = product.id AND product.stock > 0"""
     print("Looking for similar products based on profile")
@@ -19,15 +19,19 @@ def similar_products(profile= None):
     return
 
 def viewed_before(profile= None):
+    if not profile:
+        profile = random.choice(ids)
     viewed_before = """SELECT product.id FROM viewed_before, product, stock, profile WHERE profile.id = (%)
         viewed_before.profile_id = profile.id AND viewed_before.product_id = product.id AND 
         product.stock > 0"""
     print("Retrieving previously seen products")
-    get_viewed_before = qr.run_query(viewed_before)
+    get_viewed_before = qr.run_query(viewed_before, profile)
     print(f"Previously seen products retrieved\n{get_viewed_before}")
     return
 
 def products_ordered_recommendations(profile= None):
+    if not profile:
+        profile = random.choice(ids)
     ordered = """SELECT products_ordered.productid FROM products_ordered, session, buid, profile
     WHERE profile.id = buid.profileid AND profile.id = (%) AND buid.id = session.buidid AND 
     session.id = products_ordered.sessionid"""
@@ -45,10 +49,14 @@ def products_ordered_recommendations(profile= None):
     print(f"Retrieved similar to ordered products\n{get_products}")
     return
 
-def profile_recommendations(profile= None):
-    similar_to_viewed_before = """SELECT product.id from product, viewed_before, profile, product_preference,
-     preference, stock WHERE profile.id = viewed_before.profileid AND viewed_before.productid = preference"""
-    # TO DO
+# TO DO
+def session_preference(profile= None):
     session_preference = """SELECT product_id FROM preference, session_preference, session, buid, profile,
      event WHERE profile.id = buid.profile_id and buid.id = session.buid_id and session.id = 
      session_preference.session_id and session.id = event.session_id AND session_preference.preferenceid = preference.id"""
+
+if __name__ == "__main__":
+    ids = profiles()
+    similar_products()
+    viewed_before()
+    products_ordered_recommendations()
