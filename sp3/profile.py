@@ -106,9 +106,6 @@ def session_preference(profile= None):
         products_ids = [product for product in qr.run_query(prod_ids, event, True)]
     for id in products_ids:
         preference_ids = [preference for preference in qr.run_query(get_preference_ids, id, True)]
-    get_products = """SELECT product.id FROM product, preference, product_preference WHERE preference.id
-                        = %s AND preference.id = product_preference.preference_id AND 
-                        product_preference.product_id = product.id"""
     for pref in preference_ids:
         products_similar_to_seen = [row for row in qr.run_query(get_products, pref, True)]
 
