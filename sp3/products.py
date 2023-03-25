@@ -12,7 +12,6 @@ def product_ids():
 def product_recommendations(product= None):
     if not product:
         product = random.choice(ids)
-    print(product)
     preference_id = """SELECT preference.id FROM preference, product_preference, product WHERE product.id = %s 
     AND preference.id = product_preference.preference_id and product_preference.product_id = product.id"""
     get_products = """SELECT product.id FROM product, product_preference, preference WHERE preference.id = %s AND 

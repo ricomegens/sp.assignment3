@@ -1,6 +1,15 @@
 import random
 import querie_runner as qr
+import products as pd
 
+# statement to get preference id from product id
+get_preference_ids = """SELECT preference.id FROM preference, product, product_preference WHERE
+                            product.id = %s AND product.id = product_preference.product_id AND 
+                            product_preference.preference_id = preference.id"""
+# statement to get product id from preference id
+get_products = """SELECT product.id FROM product, preference, product_preference WHERE preference.id
+                        = %s AND preference.id = product_preference.preference_id AND 
+                        product_preference.product_id = product.id"""
 
 def profile():
     profiles = """SELECT profile.id FROM profile"""
@@ -10,7 +19,7 @@ def profile():
 
 def similar_products(profile= None):
     if not profile:
-        profile = id
+        profile = profile_id
     similar = """SELECT product_id FROM similars, profile, product WHERE profile.id = %s AND similars.profile_id
         = profile.id AND similars.product_id = product.id AND product.stock > 0 AND product.recommendable = True"""
     print("Looking for similar products based on profile")
@@ -22,7 +31,7 @@ def similar_products(profile= None):
 
 def viewed_before(profile= None):
     if not profile:
-        profile = id
+        profile = profile_id
     viewed_before = """SELECT product.id FROM viewed_before, product, profile WHERE profile.id = %s
         AND viewed_before.profile_id = profile.id AND viewed_before.product_id = product.id AND
         product.recommendable = True AND product.stock > 0"""
@@ -36,7 +45,7 @@ def viewed_before(profile= None):
 
 def products_ordered_recommendations(profile= None):
     if not profile:
-        profile = id
+        profile = profile_id
     ordered = """SELECT product_ordered.product_id FROM product_ordered, session, buid, profile
     WHERE profile.id = buid.profile_id AND profile.id = %s AND buid.id = session.buid_id AND 
     session.id = product_ordered.session_id"""
@@ -61,7 +70,7 @@ def products_ordered_recommendations(profile= None):
 
 def recommend_long_events(profile= None):
     if not profile:
-        profile = id
+        profile = profile_id
     long_events = """SELECT event.id FROM session, buid, profile, event WHERE profile.id = %s AND 
                         profile.id = buid.profile_id AND buid.id = session.buid_id AND session.id = event.session_id
                         AND event.time_on_page > 30"""
@@ -81,10 +90,9 @@ def recommend_long_events(profile= None):
 # TO DO
 def session_preference(profile= None):
     if not profile:
-        profile = id
+        profile = profile_id
     events = """SELECT event.id FROM session, buid, profile, event WHERE profile.id = %s AND 
                 profile.id = buid.profile_id AND buid.id = session.buid_id AND session.id = event.session_id"""
-    profile = ("5c1233268d522a0001610a0a",)
     get_event_ids = qr.run_query(events, profile, True)
     # Incase a profile has no events
     if len(get_event_ids) == 0:
@@ -96,9 +104,6 @@ def session_preference(profile= None):
                         = product.id"""
     for event in get_event_ids:
         products_ids = [product for product in qr.run_query(prod_ids, event, True)]
-    get_preference_ids = """SELECT preference.id FROM preference, product, product_preference WHERE
-                            product.id = %s AND product.id = product_preference.product_id AND 
-                            product_preference.preference_id = preference.id"""
     for id in products_ids:
         preference_ids = [preference for preference in qr.run_query(get_preference_ids, id, True)]
     get_products = """SELECT product.id FROM product, preference, product_preference WHERE preference.id
@@ -110,10 +115,37 @@ def session_preference(profile= None):
     print(f"Products \n{products_similar_to_seen}")
     return
 
+def previously_recommended(profile= None):
+    if not profile:
+        profile = profile_id
+    previously_recommend = """SELECT product.id FROM product, previously_recommended, profile WHERE
+                                profile.id = %s AND profile.id = previously_recommended.profile_id AND
+                                previously_recommended.product_id = product.id AND product.stock > 0 
+                                AND product.recommendable = True"""
+    get_previously_recommended = qr.run_query(previously_recommend, profile, True)
+    if len(get_previously_recommended) == 0:
+        print('No product founds')
+        return
+    print(f'Products\n{get_previously_recommended}')
+    return
+
+def similar_to_previously_recommended(profile= None):
+    if not profile:
+        profile = profile_id
+    prev_recommend = previously_recommended(profile)
+    for product in prev_recommend:
+        prods = [row for row in pd.product_recommendations(product)]
+    print(f"Products\n{prods}")
+    return
+
+
+
 if __name__ == "__main__":
-    id = profile()
+    profile_id = profile()
     # similar_products()
     # viewed_before()
     # products_ordered_recommendations()
     # recommend_long_events()
-    session_preference()
+    # session_preference()
+    # previously_recommended()
+    # similar_to_previously_recommended()
