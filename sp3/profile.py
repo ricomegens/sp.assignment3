@@ -5,7 +5,7 @@ import products as pd
 def profile():
     # select all profile ids
     profiles = """SELECT profile.id FROM profile"""
-    get_profiles = qr.run_query(profiles, fetch=True)
+    get_profiles = qr.run_query(profiles)
     # run query and put them in a list, return a random profile
     all_profiles = [profile for profile in get_profiles]
     return random.choice(all_profiles)
@@ -16,7 +16,7 @@ def similar_products(profile= None):
         profile = profile_id
     similar = """SELECT product_id FROM similars, profile, product WHERE profile.id = %s AND similars.profile_id
         = profile.id AND similars.product_id = product.id AND product.stock > 0 AND product.recommendable = True"""
-    get_similar = qr.run_query(similar, profile, True)
+    get_similar = qr.run_query(similar, profile)
     # if a profile has no similar products
     if len(get_similar) == 0:
         print("No similar products found")
@@ -60,7 +60,7 @@ def products_ordered_recommendations(profile= None):
     ordered = """SELECT product_ordered.product_id FROM product_ordered, session, buid, profile
     WHERE profile.id = buid.profile_id AND profile.id = %s AND buid.id = session.buid_id AND 
     session.id = product_ordered.session_id"""
-    get_ordered = qr.run_query(ordered, profile, True)
+    get_ordered = qr.run_query(ordered, profile)
     # If no products are ordered
     if not get_ordered:
         print("No products ordered")
@@ -79,7 +79,7 @@ def recommend_long_events(profile= None):
     long_events = """SELECT event.id FROM session, buid, profile, event WHERE profile.id = %s AND 
                         profile.id = buid.profile_id AND buid.id = session.buid_id AND session.id = event.session_id
                         AND event.time_on_page > 30"""
-    get_long_events = qr.run_query(long_events, profile, True)
+    get_long_events = qr.run_query(long_events, profile)
     # if a profile has no events in which this is the case
     if len(get_long_events) == 0:
         print("No relevant events found")
@@ -89,7 +89,7 @@ def recommend_long_events(profile= None):
                             = product.id AND product.stock > 0"""
     # Loop through incase of multiple events
     for event in get_long_events:
-        interested = [product[0] for product in qr.run_query(products_interested, event, True)]
+        interested = [product[0] for product in qr.run_query(products_interested, event)]
     print(f"Products customer took a long interest in\n{interested}")
     return
 
@@ -101,7 +101,7 @@ def session_preference(profile= None):
     events = """SELECT event.id FROM session, buid, profile, event WHERE profile.id = %s AND 
                 profile.id = buid.profile_id AND buid.id = session.buid_id AND session.id = event.session_id
                 AND event.time_on_page < 30"""
-    get_event_ids = qr.run_query(events, profile, True)
+    get_event_ids = qr.run_query(events, profile)
     # Incase a profile has no events
     if len(get_event_ids) == 0:
         print("No relevant events found")
@@ -111,7 +111,7 @@ def session_preference(profile= None):
     prod_ids = """SELECT product.id FROM product, session, event WHERE event.id = %s AND event.product_id
                         = product.id"""
     for event in get_event_ids:
-        products_ids = [product for product in qr.run_query(prod_ids, event, True)]
+        products_ids = [product for product in qr.run_query(prod_ids, event)]
     # Loop through these product ids and get the preference ids to get product ids to recommend
     for id in products_ids:
         products_similar_to_seen = [row for row in pd.product_recommendations(id)]
@@ -127,7 +127,7 @@ def previously_recommended(profile= None):
                                 profile.id = %s AND profile.id = previously_recommended.profile_id AND
                                 previously_recommended.product_id = product.id AND product.stock > 0 
                                 AND product.recommendable = True"""
-    get_previously_recommended = qr.run_query(previously_recommend, profile, True)
+    get_previously_recommended = qr.run_query(previously_recommend, profile)
     # if a profile has no previously recommended products
     if len(get_previously_recommended) == 0:
         print('No product founds')
@@ -156,7 +156,7 @@ def new_profile(profile= None):
     # return product ids based on if there is stock, it is recommendable and if customers buy it on repeat
     random_product = """SELECT product.id FROM product WHERE product.stock > 0 AND product.recommendable
                         = True AND product.herhaalaankopen = True"""
-    get_random_product = qr.run_query(random_product, profile, True)
+    get_random_product = qr.run_query(random_product, profile)
     print(f"Products recommended\n{get_random_product}")
     return
 

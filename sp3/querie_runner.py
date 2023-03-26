@@ -4,7 +4,7 @@ import dotenv
 database = "huwebshop_test"
 
 
-def run_query(query, arguments=None, fetch=False):
+def run_query(query, arguments=None):
     # loading env file for password
     dotenv.load_dotenv()
     # connect to the database
@@ -21,6 +21,4 @@ def run_query(query, arguments=None, fetch=False):
     con.commit()
     cur.close()
     con.close()
-    if not fetch:
-        return
     return data
