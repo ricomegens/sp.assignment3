@@ -7,12 +7,12 @@ def product_ids():
     get_ids = qr.run_query(ids)
     products = [id for id in get_ids]
     print("All product ids retrieved")
-    return products
+    return random.choice(products)
 
 def product_recommendations(product= None):
     # If no product id is inserted, choose the random one
     if not product:
-        product = random.choice(ids)
+        product = ids
     # SQL statements to get the preference id and product id
     preference_id = """SELECT preference.id FROM preference, product_preference, product WHERE product.id = %s 
     AND preference.id = product_preference.preference_id and product_preference.product_id = product.id"""
@@ -30,4 +30,5 @@ def product_recommendations(product= None):
 
 if __name__ == "__main__":
     ids = product_ids()
+    print(ids)
     product_recommendations()
