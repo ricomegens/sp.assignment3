@@ -3,7 +3,6 @@ import random
 
 def product_ids():
     ids = """SELECT product.id FROM product"""
-    print("Getting all product ids")
     get_ids = qr.run_query(ids)
     products = [id for id in get_ids]
     print("All product ids retrieved")
@@ -30,5 +29,4 @@ def product_recommendations(product= None):
 
 if __name__ == "__main__":
     ids = product_ids()
-    print(ids)
     product_recommendations()
